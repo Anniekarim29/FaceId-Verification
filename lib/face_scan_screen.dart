@@ -63,6 +63,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   late final AnimationController _buttonCtrl;
   // Success circle expand + fade
   late final AnimationController _successCtrl;
+  // Eyes motion (looking around)
+  late final AnimationController _eyesCtrl;
 
   _ScanStatus _status = _ScanStatus.scanning;
   bool _verified = false;
@@ -98,6 +100,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
       vsync: this,
       duration: const Duration(milliseconds: 900),
     );
+
+    _eyesCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
   }
 
   @override
@@ -107,6 +114,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
     _pulseCtrl.dispose();
     _buttonCtrl.dispose();
     _successCtrl.dispose();
+    _eyesCtrl.dispose();
     super.dispose();
   }
 
@@ -325,6 +333,19 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                         _SuccessOverlay(
                           controller: _successCtrl,
                           size: ringSize * 0.72,
+                        ),
+
+                      // FaceID Icon in center
+                      if (!_verified)
+                        AnimatedBuilder(
+                          animation: _eyesCtrl,
+                          builder: (_, __) {
+                            return _FaceIdIcon(
+                              size: ringSize * 0.32,
+                              animation: _eyesCtrl.value,
+                              status: _status,
+                            );
+                          },
                         ),
                     ],
                   ),
@@ -682,4 +703,134 @@ class _FaceFramePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_FaceFramePainter old) => old.color != color;
+}
+
+/// ─── FaceID Icon Widget ───────────────────────────────────────────────────────
+class _FaceIdIcon extends StatelessWidget {
+  const _FaceIdIcon({
+    required this.size,
+    required this.animation,
+    required this.status,
+  });
+
+  final double size;
+  final double animation;
+  final _ScanStatus status;
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      size: Size(size, size),
+      painter: _FaceIdPainter(
+        color: _Palette.textSecondary.withValues(alpha: 0.8),
+        animation: animation,
+        isAnalyzing: status == _ScanStatus.analyzing,
+      ),
+    );
+  }
+}
+
+class _FaceIdPainter extends CustomPainter {
+  _FaceIdPainter({
+    required this.color,
+    required this.animation,
+    required this.isAnalyzing,
+  });
+
+  final Color color;
+  final double animation;
+  final bool isAnalyzing;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.06
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final w = size.width;
+    final h = size.height;
+    final r = w * 0.25; // corner radius for the face box
+
+    // 1. Draw rounded face box
+    final faceRect = RRect.fromRectAndRadius(
+      Rect.fromLTWH(0, 0, w, h),
+      Radius.circular(r),
+    );
+    canvas.drawRRect(faceRect, paint);
+
+    // 2. Draw Nose (J shape)
+    final nosePath = Path()
+      ..moveTo(w * 0.5, h * 0.35)
+      ..lineTo(w * 0.5, h * 0.6)
+      ..arcToPoint(
+        Offset(w * 0.4, h * 0.65),
+        radius: Radius.circular(w * 0.1),
+        clockwise: false,
+      );
+    canvas.drawPath(nosePath, paint);
+
+    // 3. Draw Eyes (Motion)
+    // We'll calculate an offset based on animation
+    // Look left (0.2), center (0.4), right (0.6), center (0.8)
+    double eyeOffsetX = 0;
+    double eyeOffsetY = 0;
+
+    if (!isAnalyzing) {
+      if (animation < 0.25) {
+        eyeOffsetX = math.sin(animation * 4 * math.pi) * (w * 0.05);
+      } else if (animation > 0.5 && animation < 0.75) {
+        eyeOffsetY = math.sin((animation - 0.5) * 4 * math.pi) * (w * 0.03);
+      }
+    } else {
+      // Analyzing: fast subtle vibration
+      eyeOffsetX = math.sin(animation * 20 * math.pi) * (w * 0.02);
+    }
+
+    final eyePaint = Paint()
+      ..color = color
+      ..style = PaintingStyle.fill;
+
+    final eyeW = w * 0.08;
+    final eyeH = h * 0.22;
+    final eyeY = h * 0.35;
+
+    // Left eye
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(w * 0.3 + eyeOffsetX, eyeY + eyeOffsetY),
+          width: eyeW,
+          height: eyeH,
+        ),
+        Radius.circular(eyeW / 2),
+      ),
+      eyePaint,
+    );
+
+    // Right eye
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(
+          center: Offset(w * 0.7 + eyeOffsetX, eyeY + eyeOffsetY),
+          width: eyeW,
+          height: eyeH,
+        ),
+        Radius.circular(eyeW / 2),
+      ),
+      eyePaint,
+    );
+
+    // 4. Draw Smile / Bottom Curve
+    final smilePath = Path()
+      ..moveTo(w * 0.25, h * 0.75)
+      ..quadraticBezierTo(w * 0.5, h * 0.9, w * 0.75, h * 0.75);
+    canvas.drawPath(smilePath, paint);
+  }
+
+  @override
+  bool shouldRepaint(_FaceIdPainter old) =>
+      old.animation != animation || old.isAnalyzing != isAnalyzing;
 }
