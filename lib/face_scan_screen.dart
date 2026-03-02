@@ -174,8 +174,11 @@ class _FaceScanScreenState extends State<FaceScanScreen>
           ),
 
           SafeArea(
-            child: Column(
-              children: [
+            child: SizedBox(
+              width: size.width,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
                 const SizedBox(height: 24),
 
                 // ── Time & Date ─────────────────────────────────────────────
@@ -204,7 +207,7 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                                 shape: BoxShape.circle,
                                 border: Border.all(
                                   color: _Palette.ringPrimary
-                                      .withOpacity(0.15 + _pulseCtrl.value * 0.07),
+                                      .withValues(alpha: 0.15 + _pulseCtrl.value * 0.07),
                                   width: 1,
                                 ),
                               ),
@@ -348,7 +351,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
                 ),
 
                 const SizedBox(height: 40),
-              ],
+                ],
+              ),
             ),
           ),
         ],
@@ -391,6 +395,7 @@ class _TimeBlock extends StatelessWidget {
         '${days[now.weekday % 7]}, ${months[now.month - 1]} ${now.day}';
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
           '$hour:$minute',
@@ -425,6 +430,7 @@ class _StatusText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         AnimatedSwitcher(
           duration: const Duration(milliseconds: 400),
