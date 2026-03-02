@@ -148,7 +148,8 @@ class _FaceScanScreenState extends State<FaceScanScreen>
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final ringSize = size.width * 0.72;
+    // Limit ring size to prevent overflow on shorter screens
+    final ringSize = math.min(size.width * 0.72, size.height * 0.45);
 
     return Scaffold(
       backgroundColor: _Palette.bg,
