@@ -421,9 +421,9 @@ class _TimeBlock extends StatelessWidget {
       children: [
         Text(
           '$hour:$minute',
-          style: GoogleFonts.inter(
+          style: GoogleFonts.outfit(
             fontSize: 72,
-            fontWeight: FontWeight.w200,
+            fontWeight: FontWeight.w400,
             letterSpacing: -2,
             color: _Palette.textPrimary,
             height: 1.0,
@@ -432,9 +432,9 @@ class _TimeBlock extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           dateStr,
-          style: GoogleFonts.inter(
+          style: GoogleFonts.outfit(
             fontSize: 15,
-            fontWeight: FontWeight.w400,
+            fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
             color: _Palette.textSecondary,
           ),
@@ -469,9 +469,9 @@ class _StatusText extends StatelessWidget {
           child: Text(
             status.label,
             key: ValueKey(status.label),
-            style: GoogleFonts.inter(
+            style: GoogleFonts.outfit(
               fontSize: 22,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.2,
               color: status == _ScanStatus.verified
                   ? _Palette.successGreen
@@ -485,9 +485,9 @@ class _StatusText extends StatelessWidget {
           child: Text(
             status.subtitle,
             key: ValueKey(status.subtitle),
-            style: GoogleFonts.inter(
+            style: GoogleFonts.outfit(
               fontSize: 13,
-              fontWeight: FontWeight.w400,
+              fontWeight: FontWeight.w500,
               letterSpacing: 0.3,
               color: _Palette.textSecondary,
             ),
@@ -542,9 +542,9 @@ class _VerifyButton extends StatelessWidget {
             child: Text(
               verified ? 'Verified' : scanning ? 'Verifying…' : 'Verify Identity',
               key: ValueKey('$verified-$scanning'),
-              style: GoogleFonts.inter(
+              style: GoogleFonts.outfit(
                 fontSize: 14,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 letterSpacing: 0.4,
                 color: verified ? _Palette.successGreen : _Palette.textSecondary,
               ),

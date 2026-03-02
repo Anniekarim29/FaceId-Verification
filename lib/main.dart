@@ -26,7 +26,7 @@ class FaceIDApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         brightness: Brightness.dark,
-        textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+        textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme),
         scaffoldBackgroundColor: const Color(0xFF0A0F1E),
       ),
       home: const FaceScanScreen(),
